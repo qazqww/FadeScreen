@@ -20,6 +20,10 @@ public class Node : MonoBehaviour
     {
         get { return col; }
     }
+    public bool State
+    {
+        get { return state; }
+    }
 
     public void SetNode(int row, int col)
     {
@@ -34,7 +38,7 @@ public class Node : MonoBehaviour
 
     public void SetTransparent(bool b)
     {
-        if (state == b) return;
+        //if (state == b) return;
         StartCoroutine(Transparent(b));
     }
 
@@ -47,7 +51,7 @@ public class Node : MonoBehaviour
             while (alpha > 0f)
             {
                 Debug.Log("투명화");
-                alpha -= 0.05f;
+                alpha -= 0.02f;
                 image.color = new Color(image.color.r, image.color.g, image.color.b, alpha);
                 yield return null;
             }            
@@ -57,7 +61,7 @@ public class Node : MonoBehaviour
             while (alpha < 1f)
             {
                 Debug.Log("반투명화");
-                alpha += 0.05f;
+                alpha += 0.02f;
                 image.color = new Color(image.color.r, image.color.g, image.color.b, alpha);
                 yield return null;
             }            

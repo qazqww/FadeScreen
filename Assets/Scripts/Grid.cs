@@ -9,6 +9,7 @@ public class Grid : MonoBehaviour
     public Node[,] nodeArr;
 
     List<Node> nodes = new List<Node>();
+    List<Node> fadeOrder = new List<Node>();
 
     Transform root;
 
@@ -18,7 +19,7 @@ public class Grid : MonoBehaviour
         root = transform.Find("Root");
         CreateGrid(nodeCount);
     }
-    
+
     void Update()
     {
         //if (Input.GetKeyDown(KeyCode.R))
@@ -28,8 +29,16 @@ public class Grid : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.R))
         {
-            StartCoroutine(TransparentOne(true, nodeCount / 2, nodeCount / 2));
-            StartCoroutine(TransparentNear(nodeArr[nodeCount / 2, nodeCount / 2]));
+            SetOrder();
+        }
+        else if (Input.GetKey(KeyCode.T))
+        {
+            StartCoroutine(Execute(fadeOrder));
+        }
+        else if (Input.GetKeyDown(KeyCode.P))
+        {
+            for (int i = 0; i < fadeOrder.Count; i++)
+                Debug.Log(fadeOrder[i]);
         }
     }
 
@@ -46,41 +55,40 @@ public class Grid : MonoBehaviour
                 nodeArr[row, col] = node;
                 node.name = "Node : " + count++;
                 node.SetNode(row, col);
-                node.transform.localPosition = new Vector3(col * 100, -row * 100, 0);
+                node.transform.localPosition = new Vector3(col * 100 - (nodeCount - 1) * 50, -(row * 100 - (nodeCount - 1) * 50), 0);
             }
     }
 
-    IEnumerator TransparentOne(bool b, int row, int col)
+    void TransparentOne(bool b, int row, int col)
     {
         nodeArr[row, col].SetTransparent(b);
-        yield return null;
     }
 
-    Node[] FindNear(Node node)
+    void SetOrder()
     {
-        nodes.Clear();
-        for (int row = -1; row <= 1; row++)
-            for (int col = -1; col <= 1; col++)
-            {
-                if (node.Row + row < 0 || node.Row + row >= nodeCount ||
-                        node.Col + col < 0 || node.Col + col >= nodeCount)
-                    continue;
-                if (row == 0 && col == 0)
-                    continue;
-                nodes.Add(nodeArr[node.Row + row, node.Col + col]);
-            }
-        return nodes.ToArray();
-    }
-
-    IEnumerator TransparentNear(Node node)
-    {
-        Node[] nodes = FindNear(node);
-
-        for(int i=0; i<nodes.Length; i++)
+        fadeOrder.Clear();
+        int center = nodeCount / 2;
+        fadeOrder.Add(nodeArr[center, center]);
+        for (int i = 1; i <= center; i++)
         {
-            Debug.Log(nodes[i]);
+            for (int row = center - i; row <= center + i; row++)
+                for (int col = center - i; col <= center + i; col++)
+                {
+                    if(row == center - i || row == center + i)
+                        fadeOrder.Add(nodeArr[row, col]);
+                    else
+                        if (col == center - i || col == center + i)
+                            fadeOrder.Add(nodeArr[row, col]);
+                }
+        }
+    }
+
+    IEnumerator Execute(List<Node> nodes)
+    {
+        for(int i=0; i<nodes.Count; i++)
+        {
             nodes[i].SetTransparent(true);
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.01f);
         }
     }
 }
