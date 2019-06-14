@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class Grid : MonoBehaviour
 {
-    public int nodeCount = 5;
+    public int rowCount = 5;
+    public int colCount = 5;
     public Node nodePrefab;
     public Node[,] nodeArr;
 
@@ -17,7 +18,7 @@ public class Grid : MonoBehaviour
     {
         nodePrefab = Resources.Load<Node>("Node");
         root = transform.Find("Root");
-        CreateGrid(nodeCount);
+        CreateGrid(rowCount, colCount);
     }
 
     void Update()
@@ -42,20 +43,21 @@ public class Grid : MonoBehaviour
         }
     }
 
-    void CreateGrid(int nodeCount)
+    void CreateGrid(int rowCount, int colCount)
     {
-        this.nodeCount = nodeCount;
+        this.rowCount = rowCount;
+        this.colCount = colCount;
         int count = 0;
-        nodeArr = new Node[nodeCount, nodeCount];
+        nodeArr = new Node[rowCount, colCount];
         
-        for (int row = 0; row < nodeCount; ++row)
-            for (int col = 0; col < nodeCount; ++col)
+        for (int row = 0; row < rowCount; ++row)
+            for (int col = 0; col < colCount; ++col)
             {
                 Node node = Instantiate(nodePrefab, Vector3.zero, Quaternion.identity, root);
                 nodeArr[row, col] = node;
                 node.name = "Node : " + count++;
                 node.SetNode(row, col);
-                node.transform.localPosition = new Vector3(col * 100 - (nodeCount - 1) * 50, -(row * 100 - (nodeCount - 1) * 50), 0);
+                node.transform.localPosition = new Vector3(col * 100 - (colCount - 1) * 50, -(row * 100 - (rowCount - 1) * 50), 0);
             }
     }
 
@@ -67,17 +69,20 @@ public class Grid : MonoBehaviour
     void SetOrder()
     {
         fadeOrder.Clear();
-        int center = nodeCount / 2;
-        fadeOrder.Add(nodeArr[center, center]);
-        for (int i = 1; i <= center; i++)
+        int rowCenter = rowCount / 2;
+        int colCenter = colCount / 2;
+        fadeOrder.Add(nodeArr[rowCenter, colCenter]);
+        for (int i = 1; i <= Mathf.Max(rowCenter, colCenter); i++)
         {
-            for (int row = center - i; row <= center + i; row++)
-                for (int col = center - i; col <= center + i; col++)
+            for (int row = rowCenter - i; row <= rowCenter + i; row++)
+                for (int col = colCenter - i; col <= colCenter + i; col++)
                 {
-                    if(row == center - i || row == center + i)
+                    if (row < 0 || row >= rowCount || col < 0 || col >= colCount)
+                        continue;
+                    if(row == rowCenter - i || row == rowCenter + i)
                         fadeOrder.Add(nodeArr[row, col]);
                     else
-                        if (col == center - i || col == center + i)
+                        if (col == colCenter - i || col == colCenter + i)
                             fadeOrder.Add(nodeArr[row, col]);
                 }
         }
@@ -88,7 +93,7 @@ public class Grid : MonoBehaviour
         for(int i=0; i<nodes.Count; i++)
         {
             nodes[i].SetTransparent(true);
-            yield return new WaitForSeconds(0.01f);
+            yield return new WaitForSeconds(0.001f);
         }
     }
 }
